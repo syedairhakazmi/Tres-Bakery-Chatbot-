@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tres Bakery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #2a1506;
+      --sidebar:     #1f0f03;
+      --panel:       #2e1908;
+      --card:        #3d2210;
+      --card2:       #4a2b14;
+      --accent:      #ff8c42;
+      --accent2:     #ffb347;
+      --accent3:     #e05c1a;
+      --rose:        #f4845f;
+      --cream:       #fff4e6;
+      --creamsoft:   #ffe8cc;
+      --border:      rgba(255,180,90,0.18);
+      --border2:     rgba(255,180,90,0.35);
+      --text:        #fff0dc;
+      --muted:       #c4885a;
+      --muted2:      #8a5530;
+      --mood-color:  #ff8c42;
+      --mood-dark:   #1f0f03;
+      --mood-mid:    #2e1908;
+      --mood-card:   #3d2210;
+      --mood-card2:  #4a2b14;
+      --mood-border: rgba(255,140,66,0.22);
+      --mood-border2:rgba(255,140,66,0.42);
+      --mood-glow:   rgba(255,140,66,0.22);
+      --mood-text:   #fff0dc;
+      --mood-muted:  #c4885a;
+      --mood-muted2: #8a5530;
+      --bubble-user: linear-gradient(135deg,#e05c1a,#ff8c42,#ffb347);
+      --bubble-ai:   #3a1e0a;
+    }
+
+    @keyframes fadeUp    { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn    { from{opacity:0}to{opacity:1} }
+    @keyframes popIn     { from{opacity:0;transform:scale(0.82)}to{opacity:1;transform:scale(1)} }
+    @keyframes slideIn   { from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)} }
+    @keyframes pulse     { 0%,100%{opacity:1}50%{opacity:0.45} }
+    @keyframes blink     { 0%,80%,100%{opacity:0.15}40%{opacity:1} }
+    @keyframes wiggle    { 0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)} }
+    @keyframes deleteOut { from{opacity:1;transform:translateX(0) scale(1);max-height:70px;margin-bottom:4px}to{opacity:0;transform:translateX(-28px) scale(0.92);max-height:0;margin-bottom:0;padding:0;border:0} }
+    @keyframes fly       { 0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(22px,-22px) scale(0.2)} }
+    @keyframes binShake  { 0%,100%{transform:rotate(0)}25%{transform:rotate(-14deg) scale(1.1)}75%{transform:rotate(14deg) scale(1.1)} }
+    @keyframes glowPop   { 0%,100%{box-shadow:0 4px 16px var(--mood-glow)}50%{box-shadow:0 8px 28px var(--mood-glow)} }
+    @keyframes orbitFloat{ 0%{transform:translateY(0px)}50%{transform:translateY(-8px)}100%{transform:translateY(0px)} }
+    @keyframes specialAppear{0%{opacity:0;transform:scale(0) rotate(-20deg)}60%{transform:scale(1.15) rotate(5deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+    @keyframes crumbFall { 0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(80px) rotate(720deg) scale(0.3)} }
+    @keyframes moodBadgeIn{0%{opacity:0;transform:scale(0.5) translateY(10px)}60%{transform:scale(1.2)}100%{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes shimmerBar { 0%{background-position:-200% center}100%{background-position:200% center} }
+    @keyframes toastSlide { 0%{opacity:0;transform:translateX(-50%) translateY(24px)}60%{transform:translateX(-50%) translateY(-4px)}100%{opacity:1;transform:translateX(-50%) translateY(0)} }
+    @keyframes bounce     { 0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)} }
+
+    body { font-family:'Nunito',sans-serif; background:var(--mood-dark); color:var(--mood-text); height:100vh; display:flex; overflow:hidden; transition:background 0.9s ease; }
+
+    .sidebar { width:256px; min-width:256px; background:var(--mood-dark); display:flex; flex-direction:column; padding:22px 14px; gap:14px; border-right:1px solid var(--mood-border2); position:relative; overflow:hidden; transition:background 0.9s ease, border-color 0.9s ease; }
+    .sidebar::after { content:''; position:absolute; top:0; right:0; width:1px; height:100%; background:linear-gradient(to bottom,transparent 5%,var(--mood-color) 50%,transparent 95%); opacity:0.5; transition:background 0.9s ease; }
+    .sidebar-watermark { position:absolute; bottom:-14px; right:-18px; font-size:86px; line-height:1; opacity:0.045; pointer-events:none; transform:rotate(-18deg); letter-spacing:-6px; user-select:none; }
+
+    .logo { display:flex; align-items:center; gap:11px; padding:4px 6px 0; animation:fadeIn 0.7s ease; }
+    .logo-icon { font-size:28px; animation:wiggle 3s ease-in-out infinite; display:inline-block; filter:drop-shadow(0 2px 8px var(--mood-glow)); transition:filter 0.9s ease; }
+    .logo-text { display:flex; flex-direction:column; gap:1px; }
+    .logo-name { font-family:'Fredoka One',cursive; font-size:20px; background:linear-gradient(135deg,var(--mood-color),var(--accent2),var(--rose)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; transition:background 0.9s ease; }
+    .tagline { font-size:10.5px; color:var(--mood-muted); font-weight:600; letter-spacing:0.4px; transition:color 0.9s ease; }
+
+    .divider { height:1px; background:linear-gradient(to right,transparent,var(--mood-border2),transparent); flex-shrink:0; transition:background 0.9s ease; }
+
+    .mood-section { background:var(--mood-card); border:1.5px solid var(--mood-color); border-radius:14px; padding:12px 13px; position:relative; overflow:hidden; transition:background 0.9s ease, border-color 0.9s ease; }
+    .mood-section::before { content:''; position:absolute; inset:0; border-radius:12px; background:radial-gradient(ellipse at 10% 10%,var(--mood-glow),transparent 60%); transition:background 0.9s ease; pointer-events:none; opacity:0.5; }
+    .mood-label { font-size:9.5px; text-transform:uppercase; letter-spacing:1.2px; color:var(--mood-muted2); font-weight:800; margin-bottom:8px; position:relative; }
+    .mood-display { display:flex; align-items:center; gap:8px; position:relative; }
+    .mood-emoji { font-size:22px; animation:bounce 2s ease-in-out infinite; }
+    .mood-info { flex:1; }
+    .mood-name { font-family:'Fredoka One',cursive; font-size:15px; color:var(--mood-color); transition:color 0.9s ease; letter-spacing:0.3px; }
+    .mood-bar-wrap { height:5px; background:rgba(255,255,255,0.08); border-radius:10px; margin-top:4px; overflow:hidden; }
+    .mood-bar { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--mood-color),var(--accent2)); background-size:200% auto; animation:shimmerBar 2s linear infinite; transition:width 0.9s cubic-bezier(0.34,1.56,0.64,1),background 0.9s ease; }
+    .mood-suggest { font-size:10.5px; color:var(--mood-muted); margin-top:7px; line-height:1.5; font-weight:600; position:relative; cursor:pointer; transition:color 0.2s; }
+    .mood-suggest:hover { color:var(--mood-color); }
+    .mood-suggest span { color:var(--mood-color); font-weight:700; transition:color 0.9s ease; }
+
+    .new-btn { background:linear-gradient(135deg,var(--accent3),var(--mood-color),var(--accent2)); color:white; border:none; border-radius:14px; padding:12px 16px; font-family:'Fredoka One',cursive; font-size:15px; cursor:pointer; text-align:center; width:100%; transition:all 0.3s, background 0.9s ease; position:relative; overflow:hidden; box-shadow:0 4px 14px var(--mood-glow); }
+    .new-btn::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent); transition:left 0.45s; }
+    .new-btn:hover::before { left:100%; }
+    .new-btn:hover { transform:translateY(-2px); box-shadow:0 8px 22px var(--mood-glow); }
+    .new-btn:active { transform:scale(0.97); }
+
+    .history-label { font-size:10px; text-transform:uppercase; letter-spacing:1.4px; color:var(--mood-muted2); padding:0 6px; font-weight:700; transition:color 0.9s ease; }
+
+    .chat-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
+    .chat-list::-webkit-scrollbar { width:3px; }
+    .chat-list::-webkit-scrollbar-thumb { background:var(--mood-border2); border-radius:10px; }
+
+    .chat-item { display:flex; align-items:center; gap:9px; padding:9px 10px; border-radius:12px; cursor:pointer; font-size:13px; font-weight:600; color:var(--mood-muted); transition:all 0.22s, background 0.9s ease, color 0.9s ease; border:1.5px solid transparent; position:relative; animation:slideIn 0.3s ease; }
+    .chat-item:hover { background:var(--mood-card); color:var(--mood-text); border-color:var(--mood-border); }
+    .chat-item.active { background:var(--mood-card2); color:var(--mood-text); border-color:var(--mood-border2); box-shadow:0 2px 12px var(--mood-glow); }
+    .chat-item.active::before { content:''; position:absolute; left:0; top:15%; bottom:15%; width:3.5px; background:linear-gradient(to bottom,var(--mood-color),var(--accent2)); border-radius:0 4px 4px 0; transition:background 0.9s ease; }
+    .chat-item-icon { font-size:14px; flex-shrink:0; }
+    .chat-item-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+
+    .chat-item-delete { opacity:0; flex-shrink:0; width:26px; height:26px; border-radius:8px; border:1.5px solid rgba(244,132,95,0.35); background:rgba(244,132,95,0.1); color:var(--rose); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.22s; padding:0; }
+    .chat-item:hover .chat-item-delete { opacity:1; }
+    .chat-item-delete:hover { background:rgba(244,132,95,0.25); border-color:var(--rose); transform:scale(1.12); animation:binShake 0.4s ease; }
+    .chat-item-delete svg { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; pointer-events:none; }
+    .chat-item.deleting { animation:deleteOut 0.38s ease forwards; pointer-events:none; overflow:hidden; }
+
+    .no-chats { font-size:12px; color:var(--mood-muted2); padding:10px 6px; font-style:italic; font-weight:600; }
+    .latency-info { font-size:11px; color:var(--mood-muted); padding:0 6px; min-height:16px; font-weight:600; transition:color 0.9s ease; }
+    .status-row { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--mood-muted); padding:0 6px; font-weight:600; transition:color 0.9s ease; }
+    .dot { width:8px; height:8px; border-radius:50%; background:#e05c5c; flex-shrink:0; transition:background 0.3s; }
+    .dot.on { background:#5ecb6b; box-shadow:0 0 8px rgba(94,203,107,0.7); animation:pulse 2s infinite; }
+
+    .main { flex:1; display:flex; flex-direction:column; background:var(--mood-mid); overflow:hidden; position:relative; transition:background 0.9s ease; }
+    .main::before { content:''; position:absolute; top:0; left:0; right:0; height:220px; background:radial-gradient(ellipse at 65% -10%,var(--mood-glow),transparent 65%); pointer-events:none; z-index:0; transition:background 0.9s ease; opacity:0.6; }
+
+    .chat-header { display:flex; align-items:center; gap:14px; padding:14px 24px; border-bottom:1px solid var(--mood-border); background:rgba(0,0,0,0.3); backdrop-filter:blur(12px); position:relative; z-index:3; transition:border-color 0.9s ease; }
+    .header-avatar { font-size:32px; filter:drop-shadow(0 2px 10px var(--mood-glow)); animation:wiggle 4s ease-in-out infinite; display:inline-block; transition:filter 0.9s ease; }
+    .header-info { flex:1; }
+    .header-name { font-family:'Fredoka One',cursive; font-size:19px; background:linear-gradient(135deg,var(--mood-color),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; transition:background 0.9s ease; }
+    .header-sub { font-size:11px; color:var(--mood-muted); font-weight:600; transition:color 0.9s ease; }
+
+    .mood-accent-line { height:2px; flex-shrink:0; position:relative; z-index:4; background:linear-gradient(to right,transparent,var(--mood-color) 30%,var(--mood-color) 70%,transparent); opacity:0.6; transition:background 0.9s ease; }
+
+    .todays-special { position:absolute; top:12px; right:20px; z-index:10; cursor:pointer; animation:specialAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    .special-bubble { background:linear-gradient(135deg,var(--accent3),var(--mood-color)); border:2px solid rgba(255,255,255,0.2); border-radius:20px; padding:7px 13px 7px 10px; display:flex; align-items:center; gap:7px; box-shadow:0 4px 20px var(--mood-glow),inset 0 1px 0 rgba(255,255,255,0.2); transition:all 0.25s,background 0.9s ease; animation:orbitFloat 4s ease-in-out infinite; }
+    .special-bubble:hover { transform:scale(1.06) translateY(-2px); box-shadow:0 8px 28px var(--mood-glow); }
+    .special-icon { font-size:18px; }
+    .special-text { display:flex; flex-direction:column; }
+    .special-eyebrow { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.75); }
+    .special-name { font-family:'Fredoka One',cursive; font-size:13px; color:white; letter-spacing:0.3px; line-height:1.2; }
+
+    .messages { flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:14px; position:relative; z-index:1; }
+    .messages::-webkit-scrollbar { width:4px; }
+    .messages::-webkit-scrollbar-thumb { background:var(--mood-border2); border-radius:10px; }
+
+    .empty { margin:auto; text-align:center; max-width:360px; animation:popIn 0.55s cubic-bezier(0.34,1.56,0.64,1); }
+    .empty-icon { font-size:58px; margin-bottom:14px; display:block; animation:wiggle 2.5s ease-in-out infinite; }
+    .empty-title { font-family:'Fredoka One',cursive; font-size:26px; margin-bottom:10px; background:linear-gradient(135deg,var(--mood-color),var(--accent2),var(--rose)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; transition:background 0.9s ease; }
+    .empty-sub { font-size:13.5px; color:var(--mood-muted); line-height:1.7; font-weight:600; transition:color 0.9s ease; }
+    .empty-chips { display:flex; flex-wrap:wrap; gap:9px; justify-content:center; margin-top:20px; }
+    .chip { background:var(--mood-card); border:1.5px solid var(--mood-border2); border-radius:22px; padding:7px 15px; font-size:12.5px; font-weight:700; color:var(--mood-muted); cursor:pointer; transition:all 0.22s,background 0.9s ease,border-color 0.9s ease; }
+    .chip:hover { background:var(--mood-card2); color:var(--mood-color); border-color:var(--mood-color); transform:translateY(-3px) scale(1.04); box-shadow:0 4px 14px var(--mood-glow); }
+
+    .row { display:flex; align-items:flex-end; gap:10px; animation:fadeUp 0.32s ease; }
+    .row.user { flex-direction:row-reverse; }
+
+    .avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--accent3),var(--mood-color)); color:white; font-family:'Fredoka One',cursive; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 0 14px var(--mood-glow); transition:background 0.9s ease,box-shadow 0.9s ease; }
+
+    .bubble { max-width:66%; padding:12px 17px; border-radius:20px; font-size:14px; line-height:1.65; white-space:pre-wrap; word-break:break-word; font-weight:500; }
+    .bubble.user { background:linear-gradient(135deg,var(--accent3),var(--mood-color),var(--accent2)); color:white; border-bottom-right-radius:5px; box-shadow:0 5px 18px var(--mood-glow); font-weight:600; transition:background 0.9s ease,box-shadow 0.9s ease; }
+    .bubble.assistant { background:var(--mood-card); color:var(--mood-text); border:1.5px solid var(--mood-border2); border-left:3px solid var(--mood-color); border-bottom-left-radius:5px; box-shadow:0 4px 18px rgba(0,0,0,0.3); transition:background 0.9s ease,border-color 0.9s ease,color 0.9s ease; }
+
+    .mood-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.06); border:1px solid var(--mood-color); border-radius:20px; padding:2px 8px 2px 5px; font-size:10px; font-weight:700; color:var(--mood-color); margin-top:6px; animation:moodBadgeIn 0.4s cubic-bezier(0.34,1.56,0.64,1); transition:color 0.9s ease,border-color 0.9s ease; }
+    .mood-badge-emoji { font-size:11px; }
+
+    .typing { display:inline-flex; gap:5px; align-items:center; height:22px; }
+    .typing span { width:7px; height:7px; border-radius:50%; animation:blink 1.3s infinite; background:var(--mood-color); transition:background 0.9s ease; }
+    .typing span:nth-child(2) { animation-delay:0.22s; }
+    .typing span:nth-child(3) { animation-delay:0.44s; }
+
+    .ended-banner { text-align:center; font-size:13px; font-weight:700; color:var(--mood-muted); background:var(--mood-card); border:1.5px solid var(--mood-border2); border-radius:14px; padding:12px 18px; animation:fadeIn 0.4s ease; transition:background 0.9s ease,border-color 0.9s ease; }
+
+    .input-wrap { display:flex; align-items:flex-end; gap:10px; padding:14px 22px 10px; border-top:1px solid var(--mood-border2); background:rgba(0,0,0,0.35); backdrop-filter:blur(12px); position:relative; z-index:3; transition:border-color 0.9s ease; }
+    .input-wrap::before { content:''; position:absolute; top:0; left:8%; right:8%; height:1px; background:var(--mood-color); opacity:0.3; transition:background 0.9s ease; }
+    textarea { flex:1; resize:none; border:1.5px solid var(--mood-border2); border-radius:16px; padding:12px 16px; font-family:'Nunito',sans-serif; font-size:14px; font-weight:500; color:var(--mood-text); background:var(--mood-card); outline:none; line-height:1.5; max-height:110px; overflow-y:auto; transition:border-color 0.9s ease,box-shadow 0.3s ease,background 0.9s ease,color 0.9s ease; }
+    textarea::placeholder { color:var(--mood-muted2); }
+    textarea:focus { border-color:var(--mood-color); box-shadow:0 0 0 3px var(--mood-glow); }
+    textarea:disabled { opacity:0.4; cursor:not-allowed; }
+
+    .send-btn { width:48px; height:48px; border-radius:50%; border:2.5px solid rgba(255,255,255,0.2); background:linear-gradient(145deg,var(--accent3),var(--mood-color),var(--accent2)); color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.28s cubic-bezier(0.34,1.56,0.64,1),background 0.9s ease; flex-shrink:0; box-shadow:0 4px 16px var(--mood-glow),inset 0 1px 0 rgba(255,255,255,0.25); position:relative; overflow:hidden; animation:glowPop 2.5s ease-in-out infinite; }
+    .send-btn::before { content:''; position:absolute; top:0; left:0; right:0; height:50%; background:linear-gradient(to bottom,rgba(255,255,255,0.22),transparent); border-radius:50% 50% 0 0; pointer-events:none; }
+    .send-btn svg { width:20px; height:20px; fill:white; transition:transform 0.25s ease; position:relative; z-index:1; }
+    .send-btn:hover:not(:disabled) { transform:scale(1.15) translateY(-2px); box-shadow:0 10px 28px var(--mood-glow),inset 0 1px 0 rgba(255,255,255,0.3); }
+    .send-btn:hover:not(:disabled) svg { transform:translateX(2px) translateY(-2px) rotate(-5deg); }
+    .send-btn.sending svg { animation:fly 0.42s ease forwards; }
+    .send-btn:disabled { opacity:0.32; cursor:not-allowed; box-shadow:none; transform:none; animation:none; }
+
+    .hint { text-align:center; font-size:11px; color:var(--mood-muted2); padding:4px 0 10px; font-weight:700; transition:color 0.9s ease; }
+
+    .crumb { position:fixed; pointer-events:none; font-size:14px; z-index:9999; animation:crumbFall 0.9s ease forwards; }
+
+    .mood-toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(24px); background:var(--mood-card2); border:1.5px solid var(--mood-color); color:var(--mood-text); padding:10px 20px; border-radius:14px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; z-index:9999; display:flex; align-items:center; gap:8px; transition:border-color 0.9s ease; }
+    .mood-toast.show { opacity:1; animation:toastSlide 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+    .del-toast { position:fixed; bottom:28px; right:24px; background:var(--mood-card2); border:1.5px solid rgba(244,132,95,0.5); color:var(--rose); padding:9px 16px; border-radius:12px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; z-index:9998; display:flex; align-items:center; gap:6px; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); transform:translateY(10px); }
+    .del-toast.show { opacity:1; transform:translateY(0); }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-watermark">🥐🍩🧁</div>
+    <div class="logo">
+      <span class="logo-icon">🥐</span>
+      <div class="logo-text">
+        <span class="logo-name">Tres Bakery</span>
+        <span class="tagline">Freshly baked, every day ✨</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="mood-section">
+      <div class="mood-label">✦ Vibe Check</div>
+      <div class="mood-display">
+        <span class="mood-emoji" id="mood-emoji">😊</span>
+        <div class="mood-info">
+          <div class="mood-name" id="mood-name">Happy</div>
+          <div class="mood-bar-wrap"><div class="mood-bar" id="mood-bar" style="width:70%"></div></div>
+        </div>
+      </div>
+      <div class="mood-suggest" onclick="suggestFromMood()">
+        We suggest: <span id="mood-item">🧁 Funfetti Cupcake</span>
+      </div>
+    </div>
+    <button class="new-btn" onclick="startNewChat()">＋ New Chat</button>
+    <div class="divider"></div>
+    <p class="history-label">Recent Chats</p>
+    <div class="chat-list" id="chat-list"><p class="no-chats">No chats yet 🍪</p></div>
+    <div class="divider"></div>
+    <p class="latency-info" id="latency-info"></p>
+    <div class="status-row">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-text">Connecting…</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="chat-header">
+      <span class="header-avatar">👩‍🍳</span>
+      <div class="header-info">
+        <p class="header-name">Bella</p>
+        <p class="header-sub">Tres Bakery Assistant 🎂</p>
+      </div>
+      <div class="todays-special" onclick="orderSpecial()">
+        <div class="special-bubble">
+          <span class="special-icon" id="special-icon">🍩</span>
+          <div class="special-text">
+            <span class="special-eyebrow">Today's Special</span>
+            <span class="special-name" id="special-name">Glazed Donut</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mood-accent-line"></div>
+    <div class="messages" id="messages">
+      <div class="empty" id="empty-state">
+        <span class="empty-icon">🎂</span>
+        <p class="empty-title">Welcome to Tres Bakery!</p>
+        <p class="empty-sub">Ask about our menu, custom cakes, hours, or delivery 🧁</p>
+        <div class="empty-chips">
+          <span class="chip" onclick="quickSend('Show me the menu')">🍰 Menu</span>
+          <span class="chip" onclick="quickSend('What are your hours?')">🕐 Hours</span>
+          <span class="chip" onclick="quickSend('I want a custom cake')">✨ Custom Cake</span>
+          <span class="chip" onclick="quickSend('Do you deliver?')">🚚 Delivery</span>
+        </div>
+      </div>
+    </div>
+    <div class="input-wrap">
+      <textarea id="input" rows="1" placeholder="Ask about our menu, cakes, hours…"></textarea>
+      <button class="send-btn" id="send-btn" onclick="handleSend()" title="Send">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <p class="hint">Enter to send · Shift+Enter for new line</p>
+  </main>
+
+  <div class="mood-toast" id="mood-toast">
+    <span id="mood-toast-emoji">😊</span>
+    <span id="mood-toast-text">Vibe changed!</span>
+  </div>
+  <div class="del-toast" id="del-toast">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    Chat deleted!
+  </div>
+
+  <script>
+  var HTTP='http://localhost:8000', WS='ws://localhost:8000'
+  var sessionId='', ws=null, isStreaming=false, isEnded=false, activeIndex=-1, chatHistory=[]
+
+  // ════════════════════════════════════════════════
+  // ACTUAL MENU — all suggestions come from here
+  // ════════════════════════════════════════════════
+  var MENU = {
+    cakes:     [{emoji:'🎂',name:'Chocolate Cake',price:'$28'},{emoji:'🎂',name:'Vanilla Cake',price:'$26'},{emoji:'🎂',name:'Red Velvet Cake',price:'$30'},{emoji:'🎂',name:'Custom Cake',price:'from $45'},{emoji:'💍',name:'Wedding Cake',price:'from $150'}],
+    pastries:  [{emoji:'🥐',name:'Butter Croissant',price:'$3.50'},{emoji:'🥐',name:'Almond Croissant',price:'$4.50'},{emoji:'🌀',name:'Cinnamon Roll',price:'$4'},{emoji:'🥐',name:'Danish',price:'$4'},{emoji:'🍫',name:'Pain au Chocolat',price:'$4.50'}],
+    cupcakes:  [{emoji:'🧁',name:'Vanilla Cupcake',price:'$3.50'},{emoji:'🧁',name:'Chocolate Cupcake',price:'$3.50'},{emoji:'🧁',name:'Strawberry Cupcake',price:'$4'},{emoji:'🧁',name:'Cupcake 6-pack',price:'$19'},{emoji:'🧁',name:'Cupcake 12-pack',price:'$35'}],
+    drinks:    [{emoji:'☕',name:'Coffee',price:'$3'},{emoji:'☕',name:'Latte',price:'$4.50'},{emoji:'🍫',name:'Hot Chocolate',price:'$4'}]
+  }
+
+  // All menu items flat list for Today's Special
+  var ALL_MENU_ITEMS = []
+  for (var cat in MENU) MENU[cat].forEach(function(item){ ALL_MENU_ITEMS.push(item) })
+
+  // Mood → which menu categories make sense + readable suggestion text
+  var moods = {
+    happy: {
+      emoji:'😄', name:'Happy', bar:80, msg:'feeling great',
+      suggestCats:['cupcakes','cakes'],  // happy = celebratory sweets
+      color:'#ffd166', accent2:'#ffe066', accent3:'#b87c00',
+      dark:'#1c1600',  mid:'#231c00', card:'#2e2400', card2:'#382c00',
+      border:'rgba(255,209,102,0.22)', border2:'rgba(255,209,102,0.45)',
+      glow:'rgba(255,209,102,0.20)',
+      text:'#fffbe8',  muted:'#c4a84a', muted2:'#7a6218'
+    },
+    cozy: {
+      emoji:'🥰', name:'Cozy', bar:65, msg:'in cozy mode',
+      suggestCats:['pastries','drinks'],  // cozy = warm drinks and pastries
+      color:'#e07a5f', accent2:'#f4a07a', accent3:'#8b3a22',
+      dark:'#1e0c08',  mid:'#281108', card:'#3a1a10', card2:'#461f14',
+      border:'rgba(224,122,95,0.22)', border2:'rgba(224,122,95,0.45)',
+      glow:'rgba(224,122,95,0.20)',
+      text:'#fff0eb',  muted:'#c4785a', muted2:'#7a3a22'
+    },
+    excited: {
+      emoji:'🤩', name:'Excited', bar:95, msg:'full of energy',
+      suggestCats:['cakes','cupcakes'],  // excited = party food
+      color:'#f72585', accent2:'#ff70a6', accent3:'#8b0045',
+      dark:'#1a0018',  mid:'#220020', card:'#320030', card2:'#3c0038',
+      border:'rgba(247,37,133,0.22)', border2:'rgba(247,37,133,0.45)',
+      glow:'rgba(247,37,133,0.20)',
+      text:'#ffe8f5',  muted:'#c45080', muted2:'#7a1a50'
+    },
+    calm: {
+      emoji:'😌', name:'Calm', bar:50, msg:'in zen mode',
+      suggestCats:['drinks','pastries'],  // calm = light sips and light bites
+      color:'#48cae4', accent2:'#90e0ef', accent3:'#0077a8',
+      dark:'#001618',  mid:'#001e22', card:'#002c35', card2:'#003540',
+      border:'rgba(72,202,228,0.22)', border2:'rgba(72,202,228,0.45)',
+      glow:'rgba(72,202,228,0.20)',
+      text:'#e4faff',  muted:'#4aa8c0', muted2:'#1a6880'
+    },
+    hungry: {
+      emoji:'🤤', name:'Hungry', bar:90, msg:'craving something',
+      suggestCats:['cakes','pastries','cupcakes'],  // hungry = anything big & filling
+      color:'#f4a261', accent2:'#ffcc80', accent3:'#a04c00',
+      dark:'#1e0e00',  mid:'#281400', card:'#3a1e00', card2:'#462400',
+      border:'rgba(244,162,97,0.22)', border2:'rgba(244,162,97,0.45)',
+      glow:'rgba(244,162,97,0.20)',
+      text:'#fff3e0',  muted:'#c48040', muted2:'#7a4418'
+    }
+  }
+
+  var currentMood = 'calm'
+  var currentSuggestion = ''
+
+  function getMenuSuggestion(moodKey) {
+    var m = moods[moodKey]
+    // Pick random category from mood's preferred categories
+    var cat = m.suggestCats[Math.floor(Math.random() * m.suggestCats.length)]
+    var items = MENU[cat]
+    var item = items[Math.floor(Math.random() * items.length)]
+    return item.emoji + ' ' + item.name
+  }
+
+  // ═════════════════════════════════════════════
+  // TODAY'S SPECIAL — truly random each load
+  // ═════════════════════════════════════════════
+  function pickTodaysSpecial() {
+    // Exclude wedding cake and multipacks from special
+    var eligible = ALL_MENU_ITEMS.filter(function(i){
+      return i.name !== 'Wedding Cake' && i.name !== 'Cupcake 6-pack' && i.name !== 'Cupcake 12-pack' && i.name !== 'Custom Cake'
+    })
+    return eligible[Math.floor(Math.random() * eligible.length)]
+  }
+  var todaySpecial = pickTodaysSpecial()
+  document.getElementById('special-icon').textContent = todaySpecial.emoji
+  document.getElementById('special-name').textContent = todaySpecial.name
+
+  var moodKeywords = {
+    happy:   ['happy','yay','great','awesome','love','good','nice','thank','please','hi','hello','hey','wonderful','fantastic','glad'],
+    excited: ['wow','amazing','incredible','urgent','quick','asap','now','excited','want','order','best','party','celebrate','woo'],
+    cozy:    ['warm','cozy','relax','morning','coffee','bread','home','sit','today','evening','chill','quiet','comfortable'],
+    calm:    ['fine','okay','maybe','wondering','curious','info','know','tell','please','just','looking','browse','explore'],
+    hungry:  ['hungry','starving','eat','food','craving','delicious','yummy','taste','fresh','big','feast','so hungry','meal']
+  }
+
+  function detectMood(text) {
+    var lower = text.toLowerCase()
+    var scores = {happy:0,excited:0,cozy:0,calm:0,hungry:0}
+    for (var m in moodKeywords) moodKeywords[m].forEach(function(kw){ if(lower.indexOf(kw)!==-1) scores[m]++ })
+    var best=null, bestScore=0
+    for (var m in scores) { if(scores[m]>bestScore){bestScore=scores[m];best=m} }
+    return best
+  }
+
+  function applyMood(moodKey, animate) {
+    if (!moodKey || moodKey === currentMood) return
+    currentMood = moodKey
+    var m = moods[moodKey]
+    var r = document.documentElement
+
+    r.style.setProperty('--mood-color',   m.color)
+    r.style.setProperty('--mood-dark',    m.dark)
+    r.style.setProperty('--mood-mid',     m.mid)
+    r.style.setProperty('--mood-card',    m.card)
+    r.style.setProperty('--mood-card2',   m.card2)
+    r.style.setProperty('--mood-border',  m.border)
+    r.style.setProperty('--mood-border2', m.border2)
+    r.style.setProperty('--mood-glow',    m.glow)
+    r.style.setProperty('--mood-text',    m.text)
+    r.style.setProperty('--mood-muted',   m.muted)
+    r.style.setProperty('--mood-muted2',  m.muted2)
+    r.style.setProperty('--accent2',      m.accent2)
+    r.style.setProperty('--accent3',      m.accent3)
+
+    document.getElementById('mood-emoji').textContent = m.emoji
+    document.getElementById('mood-name').textContent  = m.name
+    document.getElementById('mood-bar').style.width   = m.bar + '%'
+
+    // Suggestion always from actual menu
+    currentSuggestion = getMenuSuggestion(moodKey)
+    document.getElementById('mood-item').textContent = currentSuggestion
+
+    if (animate) {
+      document.getElementById('mood-toast-emoji').textContent = m.emoji
+      document.getElementById('mood-toast-text').textContent  = 'Vibe: ' + m.name + '! ' + capitalise(m.msg) + '~'
+      var t = document.getElementById('mood-toast')
+      t.classList.remove('show'); void t.offsetWidth
+      t.classList.add('show')
+      setTimeout(function(){ t.classList.remove('show') }, 2800)
+      spawnCrumbs(m.emoji)
+    }
+  }
+
+  function initMood(moodKey) {
+    currentMood = moodKey
+    var m = moods[moodKey]
+    var r = document.documentElement
+    r.style.setProperty('--mood-color',   m.color)
+    r.style.setProperty('--mood-dark',    m.dark)
+    r.style.setProperty('--mood-mid',     m.mid)
+    r.style.setProperty('--mood-card',    m.card)
+    r.style.setProperty('--mood-card2',   m.card2)
+    r.style.setProperty('--mood-border',  m.border)
+    r.style.setProperty('--mood-border2', m.border2)
+    r.style.setProperty('--mood-glow',    m.glow)
+    r.style.setProperty('--mood-text',    m.text)
+    r.style.setProperty('--mood-muted',   m.muted)
+    r.style.setProperty('--mood-muted2',  m.muted2)
+    r.style.setProperty('--accent2',      m.accent2)
+    r.style.setProperty('--accent3',      m.accent3)
+    document.getElementById('mood-emoji').textContent = m.emoji
+    document.getElementById('mood-name').textContent  = m.name
+    document.getElementById('mood-bar').style.width   = m.bar + '%'
+    currentSuggestion = getMenuSuggestion(moodKey)
+    document.getElementById('mood-item').textContent = currentSuggestion
+  }
+
+  function capitalise(s){ return s.charAt(0).toUpperCase()+s.slice(1) }
+
+  function suggestFromMood(){
+    // Strip emoji prefix before sending
+    var name = currentSuggestion.replace(/^[\S]+\s/,'')
+    quickSend("I'd like to order " + name)
+  }
+
+  function orderSpecial(){
+    spawnCrumbs(todaySpecial.emoji)
+    quickSend("Tell me about today's special: " + todaySpecial.name)
+  }
+
+  var pastryEmojis=['🥐','🧁','🍩','🎂','🍰','🥧','🍪','🫐','☕']
+  function spawnCrumbs(center){
+    for(var i=0;i<8;i++){(function(i){
+      setTimeout(function(){
+        var el=document.createElement('div'); el.className='crumb'
+        el.textContent=i===0?center:pastryEmojis[Math.floor(Math.random()*pastryEmojis.length)]
+        el.style.left=(30+Math.random()*40)+'vw'; el.style.top=(20+Math.random()*50)+'vh'
+        el.style.fontSize=(12+Math.random()*14)+'px'; el.style.animationDuration=(0.6+Math.random()*0.6)+'s'
+        document.body.appendChild(el); setTimeout(function(){el.remove()},1200)
+      },i*60)
+    })(i)}
+  }
+
+  window.onload = function(){
+    document.getElementById('input').addEventListener('keydown',function(e){
+      if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}
+    })
+    var typingTimer=null
+    document.getElementById('input').addEventListener('input',function(){
+      var val=this.value; clearTimeout(typingTimer)
+      if(val.length>5) typingTimer=setTimeout(function(){
+        var d=detectMood(val); if(d&&d!==currentMood) applyMood(d,false)
+      },700)
+    })
+    initMood('calm');
+    startNewChat()
+  }
+
+  function quickSend(text){document.getElementById('input').value=text;handleSend()}
+  function handleSend(){
+    var btn=document.getElementById('send-btn')
+    btn.classList.add('sending'); setTimeout(function(){btn.classList.remove('sending')},450)
+    sendMessage()
+  }
+
+  function startNewChat(){
+    isEnded=false;isStreaming=false;setInputDisabled(false)
+    document.getElementById('latency-info').textContent=''; showEmptyState()
+    fetch(HTTP+'/session/new',{method:'POST'})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        sessionId=d.session_id
+        chatHistory.unshift({id:sessionId,title:'New Chat',messages:[],mood:currentMood})
+        activeIndex=0;renderChatList();connectWebSocket()
+      }).catch(function(){setStatus(false)})
+  }
+
+  function deleteChat(index,e){
+    e.stopPropagation()
+    var items=document.getElementById('chat-list').querySelectorAll('.chat-item')
+    if(!items[index]) return
+    items[index].classList.add('deleting')
+    setTimeout(function(){
+      chatHistory.splice(index,1)
+      if(activeIndex===index){activeIndex=chatHistory.length>0?0:-1;if(activeIndex===0)switchToChat(0);else showEmptyState()}
+      else if(activeIndex>index) activeIndex--
+      renderChatList()
+      var t=document.getElementById('del-toast');t.classList.add('show')
+      setTimeout(function(){t.classList.remove('show')},2200)
+    },380)
+  }
+
+  function switchToChat(index){
+    if(isStreaming) return
+    activeIndex=index; var chat=chatHistory[index]
+    document.getElementById('messages').innerHTML=''
+    if(chat.messages.length===0) showEmptyState()
+    else for(var i=0;i<chat.messages.length;i++) renderBubble(chat.messages[i].role,chat.messages[i].text,false,chat.messages[i].mood)
+    if(chat.mood) applyMood(chat.mood,false)
+    renderChatList(); scrollToBottom()
+  }
+
+  function renderChatList(){
+    var list=document.getElementById('chat-list'); list.innerHTML=''
+    if(chatHistory.length===0){list.innerHTML='<p class="no-chats">No chats yet 🍪</p>';return}
+    for(var i=0;i<chatHistory.length;i++){
+      var item=document.createElement('div')
+      item.className='chat-item'+(i===activeIndex?' active':'')
+      var icon=document.createElement('span');icon.className='chat-item-icon';icon.textContent='💬'
+      var title=document.createElement('span');title.className='chat-item-title';title.textContent=chatHistory[i].title
+      var del=document.createElement('button');del.className='chat-item-delete';del.title='Delete'
+      del.innerHTML='<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>'
+      del.onclick=(function(idx){return function(e){deleteChat(idx,e)}})(i)
+      item.appendChild(icon);item.appendChild(title);item.appendChild(del)
+      item.onclick=(function(idx){return function(){switchToChat(idx)}})(i)
+      list.appendChild(item)
+    }
+  }
+
+  function connectWebSocket(){
+    if(ws) ws.close()
+    ws=new WebSocket(WS+'/ws/chat')
+    ws.onopen=function(){setStatus(true)}
+    ws.onclose=function(){setStatus(false)}
+    ws.onerror=function(){setStatus(false)}
+    ws.onmessage=function(event){
+      var data=JSON.parse(event.data)
+      if(data.token){
+        appendToken(data.token)
+        var chat=chatHistory[activeIndex]
+        if(chat&&chat.messages.length>0) chat.messages[chat.messages.length-1].text+=data.token
+      }
+      if(data.done){
+        isStreaming=false;setInputDisabled(false)
+        document.getElementById('latency-info').textContent='Last response: '+data.latency+'s'
+        var chat=chatHistory[activeIndex]
+        if(chat&&chat.messages.length>0){
+          var d=detectMood(chat.messages[chat.messages.length-1].text)
+          if(d&&d!==currentMood) applyMood(d,true)
+        }
+        if(data.conversation_ended){isEnded=true;setInputDisabled(true);addEndedBanner()}
+      }
+      if(data.error){isStreaming=false;setInputDisabled(false);updateLastBubble('Sorry, something went wrong 😢')}
+    }
+  }
+
+  var titleMap={'menu':'Menu Info','show menu':'Menu Info','cake':'Cake Selection','cupcake':'Cupcake Order','pastry':'Pastry Items','pastries':'Pastry Items','croissant':'Pastry Items','drink':'Drinks','coffee':'Coffee','latte':'Coffee','order':'Order Request','delivery':'Delivery','price':'Pricing','cost':'Pricing','allergy':'Dietary','vegan':'Dietary','custom':'Custom Cake','wedding':'Wedding Cake','hours':'Store Hours','open':'Store Info','special':"Today's Special"}
+
+  function generateChatTitle(chat){
+    var text=chat.messages.map(function(m){return m.text.toLowerCase()}).join(' ')
+    for(var k in titleMap) if(text.indexOf(k)!==-1) return titleMap[k]
+    return 'Tres Bakery Chat'
+  }
+
+  function sendMessage(){
+    var input=document.getElementById('input'),text=input.value.trim()
+    if(!text||isStreaming||isEnded||!ws) return
+    var d=detectMood(text); if(d&&d!==currentMood) applyMood(d,true)
+    var empty=document.getElementById('empty-state');if(empty) empty.remove()
+    var chat=chatHistory[activeIndex]
+    chat.messages.push({role:'user',text:text,mood:currentMood}); chat.mood=currentMood
+    if(chat.title==='New Chat'&&chat.messages.length>=2){chat.title=generateChatTitle(chat);renderChatList()}
+    renderBubble('user',text,false,null)
+    chat.messages.push({role:'assistant',text:'',mood:currentMood})
+    renderBubble('assistant','',true,currentMood)
+    input.value='';isStreaming=true;setInputDisabled(true)
+    ws.send(JSON.stringify({session_id:sessionId,message:text}))
+  }
+
+  function renderBubble(role,text,streaming,moodKey){
+    var messages=document.getElementById('messages')
+    var row=document.createElement('div');row.className='row '+role
+    if(role==='assistant'){var av=document.createElement('div');av.className='avatar';av.textContent='B';row.appendChild(av)}
+    var bubble=document.createElement('div');bubble.className='bubble '+role
+    if(role==='assistant'){var old=document.getElementById('last-bubble');if(old)old.id='';bubble.id='last-bubble'}
+    if(role==='assistant'&&text===''&&streaming){
+      bubble.innerHTML='<span class="typing"><span></span><span></span><span></span></span>'
+    } else {
+      bubble.textContent=text
+      if(role==='assistant'&&text&&moodKey&&moods[moodKey]){
+        var badge=document.createElement('div');badge.className='mood-badge'
+        badge.innerHTML='<span class="mood-badge-emoji">'+moods[moodKey].emoji+'</span>'+moods[moodKey].name+' vibe'
+        bubble.appendChild(badge)
+      }
+    }
+    row.appendChild(bubble);messages.appendChild(row);scrollToBottom()
+  }
+
+  function appendToken(token){
+    var b=document.getElementById('last-bubble');if(!b)return
+    var t=b.querySelector('.typing');if(t)b.innerHTML=''
+    b.textContent+=token;scrollToBottom()
+  }
+  function updateLastBubble(text){var b=document.getElementById('last-bubble');if(b)b.textContent=text}
+  function addEndedBanner(){
+    var banner=document.createElement('div');banner.className='ended-banner'
+    banner.textContent='🎂 Conversation ended. Click + New Chat to start again!'
+    document.getElementById('messages').appendChild(banner);scrollToBottom()
+  }
+  function showEmptyState(){
+    document.getElementById('messages').innerHTML=`<div class="empty" id="empty-state"><span class="empty-icon">🎂</span><p class="empty-title">Welcome to Tres Bakery!</p><p class="empty-sub">Ask about our menu, custom cakes, hours, or delivery 🧁</p><div class="empty-chips"><span class="chip" onclick="quickSend('Show me the menu')">🍰 Menu</span><span class="chip" onclick="quickSend('What are your hours?')">🕐 Hours</span><span class="chip" onclick="quickSend('I want a custom cake')">✨ Custom Cake</span><span class="chip" onclick="quickSend('Do you deliver?')">🚚 Delivery</span></div></div>`
+  }
+  function scrollToBottom(){var m=document.getElementById('messages');m.scrollTop=m.scrollHeight}
+  function setStatus(on){document.getElementById('status-dot').className=on?'dot on':'dot';document.getElementById('status-text').textContent=on?'Connected':'Disconnected'}
+  function setInputDisabled(d){document.getElementById('input').disabled=d;document.getElementById('send-btn').disabled=d}
+  </script>
+</body>
+</html>

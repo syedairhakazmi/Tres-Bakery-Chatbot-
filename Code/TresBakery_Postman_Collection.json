@@ -1,0 +1,723 @@
+{
+  "info": {
+    "name": "Tres Bakery Chatbot API",
+    "_postman_id": "tres-bakery-chatbot-collection",
+    "description": "Complete API collection for the Tres Bakery Conversational AI Chatbot. Covers health check, session management, REST chat, and WebSocket streaming.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "item": [
+        {
+          "name": "GET /health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has status field', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('status');",
+                  "    pm.expect(json.status).to.eql('ok');",
+                  "});",
+                  "pm.test('Response has ollama field', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('ollama');",
+                  "});",
+                  "pm.test('Response has active_sessions field', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('active_sessions');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Check backend health, Ollama connection status, and number of active sessions."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/health" }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"ok\",\n  \"ollama\": true,\n  \"active_sessions\": 2\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Session Management",
+      "item": [
+        {
+          "name": "POST /session/new",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response contains session_id', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('session_id');",
+                  "    pm.expect(json.session_id).to.be.a('string');",
+                  "    pm.expect(json.session_id.length).to.be.above(10);",
+                  "});",
+                  "// Save session_id for subsequent requests",
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('session_id', json.session_id);",
+                  "console.log('Session created:', json.session_id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/session/new",
+              "host": ["{{base_url}}"],
+              "path": ["session", "new"]
+            },
+            "description": "Create a new chat session. Returns a unique session_id which is automatically saved to collection variables for use in subsequent requests."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "url": { "raw": "{{base_url}}/session/new" }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"session_id\": \"3f8a2c1d-1234-5678-abcd-ef0123456789\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /session/info/:session_id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has session metadata', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('session_id');",
+                  "    pm.expect(json).to.have.property('turn_count');",
+                  "    pm.expect(json).to.have.property('history_length');",
+                  "    pm.expect(json).to.have.property('ended');",
+                  "    pm.expect(json).to.have.property('latency_log');",
+                  "    pm.expect(json).to.have.property('avg_latency');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/session/info/{{session_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["session", "info", "{{session_id}}"]
+            },
+            "description": "Get metadata for a session: turn count, history length, ended status, latency log, and average latency."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/session/info/{{session_id}}" }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"session_id\": \"3f8a2c1d-1234-5678-abcd-ef0123456789\",\n  \"turn_count\": 3,\n  \"history_length\": 6,\n  \"ended\": false,\n  \"latency_log\": [2.1, 1.8, 2.4],\n  \"avg_latency\": 2.1\n}"
+            },
+            {
+              "name": "Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/session/info/invalid-id" }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"error\": \"Session not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /session/reset",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Reset confirmation returned', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('session_id');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    pm.expect(json.message).to.include('reset');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/session/reset",
+              "host": ["{{base_url}}"],
+              "path": ["session", "reset"]
+            },
+            "description": "Reset a session: clears history, turn count, latency log, and ended flag."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "url": { "raw": "{{base_url}}/session/reset" }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"session_id\": \"3f8a2c1d-1234-5678-abcd-ef0123456789\",\n  \"message\": \"Session reset.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /session/end",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('End confirmation returned', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('session_id');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/session/end",
+              "host": ["{{base_url}}"],
+              "path": ["session", "end"]
+            },
+            "description": "Mark a session as ended. The session remains in memory until it times out."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "url": { "raw": "{{base_url}}/session/end" }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"session_id\": \"3f8a2c1d-1234-5678-abcd-ef0123456789\",\n  \"message\": \"Session ended.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. REST Chat (Non-Streaming)",
+      "item": [
+        {
+          "name": "POST /chat - Menu Inquiry",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Auto-create a session if not set",
+                  "if (!pm.collectionVariables.get('session_id')) {",
+                  "    pm.sendRequest({",
+                  "        url: pm.collectionVariables.get('base_url') + '/session/new',",
+                  "        method: 'POST'",
+                  "    }, function (err, res) {",
+                  "        pm.collectionVariables.set('session_id', res.json().session_id);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has required fields', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('session_id');",
+                  "    pm.expect(json).to.have.property('response');",
+                  "    pm.expect(json).to.have.property('latency');",
+                  "    pm.expect(json).to.have.property('conversation_ended');",
+                  "});",
+                  "pm.test('Response is a non-empty string', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.response).to.be.a('string');",
+                  "    pm.expect(json.response.length).to.be.above(0);",
+                  "});",
+                  "pm.test('Conversation is not ended', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.conversation_ended).to.eql(false);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"What's on the menu?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chat",
+              "host": ["{{base_url}}"],
+              "path": ["chat"]
+            },
+            "description": "Ask for the full menu. Bella should respond with the formatted menu using emojis."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "url": { "raw": "{{base_url}}/chat" }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"session_id\": \"3f8a2c1d-1234-5678-abcd-ef0123456789\",\n  \"response\": \"Here's our menu! 🍰 CAKES - Chocolate ($28) | Vanilla ($26) ...\",\n  \"latency\": 2.34,\n  \"conversation_ended\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /chat - Place Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response acknowledges order item', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.response).to.be.a('string');",
+                  "    pm.expect(json.response.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"I'd like a chocolate cake and a latte please\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chat",
+              "host": ["{{base_url}}"],
+              "path": ["chat"]
+            },
+            "description": "Place a valid order for items on the menu. Bella should confirm each item and show a running total."
+          }
+        },
+        {
+          "name": "POST /chat - Off-Menu Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Bot rejects off-menu item', function () {",
+                  "    var json = pm.response.json();",
+                  "    // Response should mention not having the item or redirect",
+                  "    pm.expect(json.response.toLowerCase()).to.satisfy(function(s) {",
+                  "        return s.includes(\"don't\") || s.includes(\"don't have\") || s.includes('sorry') || s.includes('we offer');",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"Can I get a brownie and a cheesecake?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chat",
+              "host": ["{{base_url}}"],
+              "path": ["chat"]
+            },
+            "description": "Request items NOT on the menu. Bella should politely decline and suggest available alternatives."
+          }
+        },
+        {
+          "name": "POST /chat - Allergen Escalation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response includes contact info for escalation', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.response).to.satisfy(function(s) {",
+                  "        return s.includes('555') || s.includes('tresbakery.com') || s.includes('staff');",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"I have a severe nut allergy, is everything safe for me?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chat",
+              "host": ["{{base_url}}"],
+              "path": ["chat"]
+            },
+            "description": "Mention a severe allergy. Policy requires Bella to escalate and provide contact information."
+          }
+        },
+        {
+          "name": "POST /chat - Out of Scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Bot redirects off-topic message', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.response).to.be.a('string');",
+                  "    pm.expect(json.response.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"What do you think about the stock market today?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chat",
+              "host": ["{{base_url}}"],
+              "path": ["chat"]
+            },
+            "description": "Send an out-of-scope message. Bella should politely redirect the conversation back to bakery topics."
+          }
+        },
+        {
+          "name": "POST /chat - End Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Conversation is marked as ended', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.conversation_ended).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"That's all, thanks bye!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chat",
+              "host": ["{{base_url}}"],
+              "path": ["chat"]
+            },
+            "description": "End the conversation. The conversation_ended flag should be true in the response."
+          }
+        },
+        {
+          "name": "POST /chat - No Session (Auto-Create)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Session auto-created when missing', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('session_id');",
+                  "    pm.expect(json.session_id.length).to.be.above(10);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"\",\n  \"message\": \"Hi there!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chat",
+              "host": ["{{base_url}}"],
+              "path": ["chat"]
+            },
+            "description": "Send a chat message with an empty session_id. The backend should auto-create a new session."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. WebSocket Chat (Instructions)",
+      "item": [
+        {
+          "name": "WS /ws/chat - Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ws/chat",
+              "host": ["{{base_url}}"],
+              "path": ["ws", "chat"]
+            },
+            "description": "WebSocket endpoint for real-time streaming chat.\n\n**Note:** Postman supports WebSocket testing. Switch the request type to 'WebSocket' in Postman and connect to: ws://localhost:8000/ws/chat\n\n**Send message format:**\n```json\n{\n  \"session_id\": \"your-session-id\",\n  \"message\": \"What cakes do you have?\"\n}\n```\n\n**Receive - streaming tokens:**\n```json\n{\"token\": \"We\"}\n{\"token\": \" have\"}\n{\"token\": \" chocolate\"}\n...\n{\"done\": true, \"latency\": 2.3, \"ttft\": 0.45, \"conversation_ended\": false}\n```\n\n**Session auto-created event (when session_id is empty):**\n```json\n{\"session_id\": \"new-uuid-here\", \"event\": \"session_created\"}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Edge Cases & Error Handling",
+      "item": [
+        {
+          "name": "POST /chat - Very Long Message (Truncation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Long message handled without error', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('response');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"I want a cake but let me explain my entire life story first. I was born in a small town and always loved baking. My grandmother used to make cakes every Sunday and I remember sitting in the kitchen watching her mix flour and sugar together. The smell of vanilla always reminds me of her kitchen. Anyway, I am now planning a birthday party and I want to order a custom cake that captures all those childhood memories with layers of vanilla and chocolate and maybe some strawberry filling too because that was always my favorite combination when I was growing up and spending summers at my grandparents house in the countryside where everything smelled like fresh bread and pastries every single morning without fail for all those years.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chat",
+              "host": ["{{base_url}}"],
+              "path": ["chat"]
+            },
+            "description": "Send a message exceeding 800 characters. The backend truncates at 800 chars and should still respond normally."
+          }
+        },
+        {
+          "name": "GET /session/info - Invalid Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Error message returned for invalid session', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/session/info/nonexistent-session-id-12345",
+              "host": ["{{base_url}}"],
+              "path": ["session", "info", "nonexistent-session-id-12345"]
+            },
+            "description": "Request session info for a session that does not exist. Should return an error object."
+          }
+        },
+        {
+          "name": "POST /chat - Complaint Escalation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Escalation response contains contact info', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.response).to.satisfy(function(s) {",
+                  "        return s.includes('555') || s.includes('tresbakery.com') || s.includes('sorry');",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"I want to complain about my order, the cake was completely wrong!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chat",
+              "host": ["{{base_url}}"],
+              "path": ["chat"]
+            },
+            "description": "Send a complaint message. Policy requires Bella to respond with empathy and provide contact information."
+          }
+        }
+      ]
+    }
+  ]
+}
