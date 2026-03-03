@@ -37,7 +37,7 @@ Conversation Manager (conversation_manager.py)
       ↕
 Local LLM Engine (llm.py)
       ↕
-Ollama → qwen2.5:1.5b (quantized, CPU inference)
+Ollama → qwen3:1.7b (quantized, CPU inference)
 ```
 
 ### Backend (Python/FastAPI)
@@ -78,7 +78,7 @@ ollama serve
 
 Pull the required model:
 ```bash
-ollama pull qwen2.5:1.5b
+ollama pull qwen3:1.7b
 ```
 
 ### 2. Install Python Dependencies
@@ -299,7 +299,7 @@ This keeps token usage bounded while preserving all information the LLM needs to
 
 ## Known Limitations
 
-- **High latency on CPU**: Average response time of ~10–20s on a standard laptop is above ideal for production. A GPU or a smaller model (qwen2.5:0.5b) would reduce this significantly.
+- **High latency on CPU**: Average response time of ~10–20s on a standard laptop is above ideal for production. A GPU or a smaller model (qwen3:1.7b) would reduce this significantly.
 - **Concurrency bottleneck**: Ollama processes one request at a time on CPU. Under concurrent load, all users queue behind each other, causing latency to multiply linearly with user count.
 - **In-memory sessions**: Sessions are stored in a Python dict and are lost on backend restart. A production system would use Redis or a database.
 - **No order persistence**: Orders are simulated within the conversation only. There is no real database integration.
@@ -313,7 +313,7 @@ This keeps token usage bounded while preserving all information the LLM needs to
 | Backend framework | FastAPI + Uvicorn |
 | Real-time communication | WebSockets |
 | LLM inference | Ollama |
-| Language model | qwen2.5:1.5b (quantized) |
+| Language model | qwen3:1.7b (quantized) |
 | Frontend | Vanilla HTML/CSS/JavaScript |
 | Containerisation | Docker + Docker Compose |
 | Testing | Python unittest (custom), stress_test.py |
@@ -324,6 +324,6 @@ This keeps token usage bounded while preserving all information the LLM needs to
 
 **Frontend "Something went wrong"** — ensure Ollama is running (`ollama serve`) and the model is pulled (`ollama list`). Verify backend is up: `curl http://localhost:8000/health`.
 
-**Slow responses** — expected on CPU. The qwen2.5:1.5b model averages 10–20s per response without a GPU. Check system RAM; the model requires ~1–2GB free.
+**Slow responses** — expected on CPU. The qwen3:1.7b model averages 10–20s per response without a GPU. Check system RAM; the model requires ~1–2GB free.
 
 **Chinese characters in response** — the model occasionally ignores the English-only instruction. This is a known limitation of small quantized models. The system prompt includes explicit instructions to prevent this.
