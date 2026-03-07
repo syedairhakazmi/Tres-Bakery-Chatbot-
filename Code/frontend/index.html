@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tres Bakery</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -153,9 +154,17 @@
 
     .avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--accent3),var(--mood-color)); color:white; font-family:'Fredoka One',cursive; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 0 14px var(--mood-glow); transition:background 0.9s ease,box-shadow 0.9s ease; }
 
-    .bubble { max-width:66%; padding:12px 17px; border-radius:20px; font-size:14px; line-height:1.65; white-space:pre-wrap; word-break:break-word; font-weight:500; }
+    .bubble { max-width:66%; padding:12px 17px; border-radius:20px; font-size:14px; line-height:1.65; word-break:break-word; font-weight:500; }
+    .bubble.user { white-space:pre-wrap; }
+    .bubble.assistant { max-width:82%; }
     .bubble.user { background:linear-gradient(135deg,var(--accent3),var(--mood-color),var(--accent2)); color:white; border-bottom-right-radius:5px; box-shadow:0 5px 18px var(--mood-glow); font-weight:600; transition:background 0.9s ease,box-shadow 0.9s ease; }
     .bubble.assistant { background:var(--mood-card); color:var(--mood-text); border:1.5px solid var(--mood-border2); border-left:3px solid var(--mood-color); border-bottom-left-radius:5px; box-shadow:0 4px 18px rgba(0,0,0,0.3); transition:background 0.9s ease,border-color 0.9s ease,color 0.9s ease; }
+
+    .bubble.assistant p { margin: 0 0 5px; }
+    .bubble.assistant p:last-child { margin-bottom: 0; }
+    .bubble.assistant ul, .bubble.assistant ol { padding-left: 18px; margin: 4px 0 6px; }
+    .bubble.assistant li { margin-bottom: 2px; }
+    .bubble.assistant strong { color: var(--mood-color); font-weight: 800; transition: color 0.9s ease; }
 
     .mood-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.06); border:1px solid var(--mood-color); border-radius:20px; padding:2px 8px 2px 5px; font-size:10px; font-weight:700; color:var(--mood-color); margin-top:6px; animation:moodBadgeIn 0.4s cubic-bezier(0.34,1.56,0.64,1); transition:color 0.9s ease,border-color 0.9s ease; }
     .mood-badge-emoji { font-size:11px; }
@@ -564,7 +573,7 @@
       if(data.token){
         appendToken(data.token)
         var chat=chatHistory[activeIndex]
-        if(chat&&chat.messages.length>0) chat.messages[chat.messages.length-1].text+=data.token
+        if(chat&&chat.messages.length>0) chat.messages[chat.messages.length-1].text=streamBuffer
       }
       if(data.done){
         isStreaming=false;setInputDisabled(false)
@@ -598,6 +607,7 @@
     if(chat.title==='New Chat'&&chat.messages.length>=2){chat.title=generateChatTitle(chat);renderChatList()}
     renderBubble('user',text,false,null)
     chat.messages.push({role:'assistant',text:'',mood:currentMood})
+    streamBuffer=''
     renderBubble('assistant','',true,currentMood)
     input.value='';isStreaming=true;setInputDisabled(true)
     ws.send(JSON.stringify({session_id:sessionId,message:text}))
@@ -612,7 +622,11 @@
     if(role==='assistant'&&text===''&&streaming){
       bubble.innerHTML='<span class="typing"><span></span><span></span><span></span></span>'
     } else {
-      bubble.textContent=text
+      if(role==='assistant'&&text){
+        var mdDiv=document.createElement('div')
+        mdDiv.innerHTML=marked.parse(formatMenuText(text),{breaks:true,gfm:true})
+        bubble.appendChild(mdDiv)
+      } else { bubble.textContent=text }
       if(role==='assistant'&&text&&moodKey&&moods[moodKey]){
         var badge=document.createElement('div');badge.className='mood-badge'
         badge.innerHTML='<span class="mood-badge-emoji">'+moods[moodKey].emoji+'</span>'+moods[moodKey].name+' vibe'
@@ -622,12 +636,24 @@
     row.appendChild(bubble);messages.appendChild(row);scrollToBottom()
   }
 
+  function formatMenuText(text){
+    return text
+      .replace(/\s*(🍰)/g,'\n$1').replace(/\s*(🥐)/g,'\n$1')
+      .replace(/\s*(🧁)/g,'\n$1').replace(/\s*(☕)/g,'\n$1')
+      .replace(/^\n/,'')
+  }
+  var streamBuffer=''
   function appendToken(token){
     var b=document.getElementById('last-bubble');if(!b)return
-    var t=b.querySelector('.typing');if(t)b.innerHTML=''
-    b.textContent+=token;scrollToBottom()
+    var t=b.querySelector('.typing');if(t){b.innerHTML='';streamBuffer=''}
+    streamBuffer+=token
+    b.innerHTML=marked.parse(formatMenuText(streamBuffer),{breaks:true,gfm:true})
+    scrollToBottom()
   }
-  function updateLastBubble(text){var b=document.getElementById('last-bubble');if(b)b.textContent=text}
+  function updateLastBubble(text){
+    var b=document.getElementById('last-bubble')
+    if(b){b.innerHTML=marked.parse(formatMenuText(text),{breaks:true,gfm:true});streamBuffer=''}
+  }
   function addEndedBanner(){
     var banner=document.createElement('div');banner.className='ended-banner'
     banner.textContent='🎂 Conversation ended. Click + New Chat to start again!'
