@@ -12,11 +12,11 @@ def stream_chat (messages):
         "messages": messages,
         "stream": True,
         "options": {
-            "temperature": 0.3,
-            "num_predict": 600,
-            "num_ctx": 4096,
+            "temperature": 0.1,
+            "num_predict": 450,
+            "num_ctx": 2048,
             "think": False,
-            "stop": ["User:", "Customer:"]
+            "stop": ["User:", "Customer:", "\n\nUser", "\n\nCustomer"]
         }
     }
 
