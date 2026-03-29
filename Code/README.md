@@ -48,6 +48,8 @@ backend/
 ├── memory.py                  # Signal/noise filtering, fact extraction
 ├── prompts.py                 # System prompts and message building
 ├── llm.py                     # Ollama integration for AI responses
+├── asr.py                     # Speech-to-text (voice input)
+├── tts.py                     # Text-to-speech (voice output)
 ├── test_system.py             # Unit test suite (no LLM required)
 ├── stress_test.py             # Latency benchmarks & stress tests
 └── requirements.txt           # Python dependencies
@@ -58,6 +60,54 @@ backend/
 frontend/
 └── index.html                 # Single-page chat interface
 ```
+
+## Voice Interface
+
+This system extends the Tres Bakery chatbot with a real-time voice interaction pipeline while maintaining fully local deployment and CPU-only inference. The voice interface enables natural spoken conversations using locally hosted ASR, LLM, and TTS models connected through a streaming architecture.
+
+The design focuses on low latency, concurrency handling, and stateful conversations while preserving the existing memory management and policy enforcement mechanisms.
+
+### Voice Pipeline Architecture
+
+```
+Microphone Input
+      ↓
+ASR (Speech → Text)
+      ↓
+Conversation Manager
+      ↓
+Local LLM (qwen3:1.7b via Ollama)
+      ↓
+TTS (Text → Speech)
+      ↓
+Streaming Audio Output
+```
+
+### Design Constraints
+
+The voice system follows the same architectural principles as the text chatbot:
+
+- Fully local deployment (no cloud APIs)
+- CPU-only inference
+- Real-time streaming interaction
+- Prompt orchestration (no tools)
+- Memory/state-based dialogue management
+- No retrieval-based augmentation
+- Multi-session support
+- Concurrent user handling (up to 4 users)
+
+### Capabilities
+
+- Real-time voice conversation
+- Streaming speech-to-text
+- Streaming text-to-speech
+- Stateful multi-turn dialogue
+- Concurrent session handling
+- Fully offline operation
+- Chat + voice web interface
+- Low-latency streaming pipeline
+
+This voice layer integrates directly with the existing conversation manager, allowing both text and voice interactions to share memory, policies, and session state.
 
 ## Prerequisites
 
